@@ -33,7 +33,7 @@ const Index = () => {
     if (password === 'vigry music') {
       setIsAuthenticated(true);
       setShowPasswordModal(false);
-      setCurrentPage('exclusive');
+      setCurrentPage('upload');
       toast.success('Доступ открыт!');
     } else {
       toast.error('Неверный пароль. Попробуйте ещё раз');
@@ -52,13 +52,12 @@ const Index = () => {
   const renderHome = () => (
     <div className="flex-1 flex items-center justify-center px-8">
       <div className="max-w-4xl w-full grid md:grid-cols-2 gap-12 items-center">
-        <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl">
+        <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-[#2C1F1F] flex items-center justify-center">
           <img
-            src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600"
-            alt="VIGRY MUSIC"
-            className="w-full h-full object-cover"
+            src="https://cdn.poehali.dev/projects/e48f1104-dc16-431f-b8cc-6abe07967657/bucket/3d071a10-b382-48a9-a240-e5bf85c629e1.png"
+            alt="VIGRY MUSIC Logo"
+            className="w-3/4 h-3/4 object-contain"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         </div>
         <div className="space-y-6">
           <h1 className="text-6xl font-bold text-white leading-tight">
@@ -93,7 +92,11 @@ const Index = () => {
               </div>
               <h3 className="text-2xl font-semibold text-white">Telegram</h3>
               <p className="text-gray-400">Анонсы новых треков и эксклюзивный контент первыми</p>
-              <Button variant="outline" className="glass glass-hover border-primary/50 text-white">
+              <Button 
+                variant="outline" 
+                className="glass glass-hover border-primary/50 text-white"
+                onClick={() => window.open('https://t.me/vigrymusic', '_blank')}
+              >
                 Перейти
               </Button>
             </div>
@@ -105,7 +108,11 @@ const Index = () => {
               </div>
               <h3 className="text-2xl font-semibold text-white">VK Видео</h3>
               <p className="text-gray-400">Все наши видеоролики и клипы в одном месте</p>
-              <Button variant="outline" className="glass glass-hover border-primary/50 text-white">
+              <Button 
+                variant="outline" 
+                className="glass glass-hover border-primary/50 text-white"
+                onClick={() => window.open('https://vkvideo.ru/@vigrymusic', '_blank')}
+              >
                 Перейти
               </Button>
             </div>
@@ -117,7 +124,11 @@ const Index = () => {
               </div>
               <h3 className="text-2xl font-semibold text-white">VK Сообщество</h3>
               <p className="text-gray-400">Обсуждения, конкурсы и прямая связь с нами</p>
-              <Button variant="outline" className="glass glass-hover border-primary/50 text-white">
+              <Button 
+                variant="outline" 
+                className="glass glass-hover border-primary/50 text-white"
+                onClick={() => window.open('https://vk.com/vigrymusic', '_blank')}
+              >
                 Перейти
               </Button>
             </div>
@@ -146,6 +157,7 @@ const Index = () => {
               size="lg"
               className="glass glass-hover text-white font-semibold"
               onClick={() => setShowPasswordModal(true)}
+              title="Войти для добавления видео"
             >
               <Icon name="Plus" size={24} />
             </Button>
@@ -288,18 +300,12 @@ const Index = () => {
           <Icon name="Share2" size={24} className="text-white" />
         </button>
         <button
-          onClick={() => {
-            if (isAuthenticated) {
-              setCurrentPage('exclusive');
-            } else {
-              setShowPasswordModal(true);
-            }
-          }}
+          onClick={() => setCurrentPage('exclusive')}
           className={`w-14 h-14 rounded-2xl glass glass-hover flex items-center justify-center ${
             currentPage === 'exclusive' ? 'bg-primary/30' : ''
           }`}
         >
-          <Icon name="Lock" size={24} className="text-white" />
+          <Icon name="Film" size={24} className="text-white" />
         </button>
         <button
           onClick={() => setCurrentPage('about')}
@@ -320,9 +326,9 @@ const Index = () => {
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
         <DialogContent className="glass border-primary/50 text-white">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Доступ к эксклюзивному контенту</DialogTitle>
+            <DialogTitle className="text-2xl">Доступ к загрузке видео</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Введите пароль для доступа к закрытым материалам
+              Введите пароль для добавления новых видео
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
