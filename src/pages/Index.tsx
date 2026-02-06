@@ -7,13 +7,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import Icon from '@/components/ui/icon';
 import { toast } from 'sonner';
 
-type Page = 'home' | 'socials' | 'exclusive' | 'about' | 'upload';
+type Page = 'home' | 'socials' | 'exclusive' | 'about' | 'upload' | 'player';
 
 interface Video {
   id: number;
   title: string;
   views: number;
   thumbnail: string;
+  videoUrl?: string;
 }
 
 const Index = () => {
@@ -23,6 +24,10 @@ const Index = () => {
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
+  const [currentVideo, setCurrentVideo] = useState<Video | null>(null);
+  const [newVideoTitle, setNewVideoTitle] = useState('');
+  const [newVideoFile, setNewVideoFile] = useState<File | null>(null);
+  const [newVideoThumbnail, setNewVideoThumbnail] = useState<File | null>(null);
   const [videos, setVideos] = useState<Video[]>([
     { id: 1, title: 'Эксклюзивный трек #1', views: 1234, thumbnail: 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400' },
     { id: 2, title: 'Закулисье студии', views: 890, thumbnail: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400' },
@@ -165,7 +170,15 @@ const Index = () => {
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {videos.map((video) => (
-            <Card key={video.id} className="glass glass-hover border-0 overflow-hidden group cursor-pointer">
+            <Card 
+              key={video.id} 
+              className="glass glass-hover border-0 overflow-hidden group cursor-pointer"
+              onClick={() => {
+                setCurrentVideo(video);
+                setVideos(prev => prev.map(v => v.id === video.id ? {...v, views: v.views + 1} : v));
+                setCurrentPage('player');
+              }}
+            >
               <div className="relative aspect-video overflow-hidden">
                 <img 
                   src={video.thumbnail} 
@@ -190,40 +203,144 @@ const Index = () => {
     </div>
   );
 
+  const renderPlayer = () => {
+    if (!currentVideo) return null;
+    
+    return (
+      <div className="flex-1 flex px-8 py-12 gap-6 overflow-hidden">
+        <div className="flex-1 space-y-6">
+          <div className="relative aspect-video bg-black rounded-2xl overflow-hidden glass">
+            {currentVideo.videoUrl ? (
+              <video 
+                src={currentVideo.videoUrl} 
+                controls 
+                autoPlay
+                className="w-full h-full"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="text-center">
+                  <Icon name="Film" size={64} className="text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Видеофайл недоступен</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-white mb-3">{currentVideo.title}</h2>
+            <div className="flex items-center text-gray-400">
+              <Icon name="Eye" size={20} className="mr-2" />
+              {currentVideo.views} просмотров
+            </div>
+          </div>
+          <Card className="glass border-0 p-6">
+            <h3 className="text-xl font-semibold text-white mb-4">О канале VIGRY MUSIC</h3>
+            <p className="text-gray-300 leading-relaxed">
+              Пространство, где живёт музыка, творчество и вдохновение. Мы выпускаем 4–5 роликов в неделю: 
+              от музыкальных клипов до закулисных историй. Наш путь начался 18 июля 2025 года с запуска радио VIGRY RADIO, 
+              а сегодня VIGRY MUSIC — это самостоятельный проект с уникальным контентом.
+            </p>
+          </Card>
+        </div>
+        <div className="w-96 space-y-4 overflow-y-auto">
+          <h3 className="text-2xl font-bold text-white">Другие видео</h3>
+          {videos.filter(v => v.id !== currentVideo.id).map((video) => (
+            <Card 
+              key={video.id} 
+              className="glass glass-hover border-0 overflow-hidden cursor-pointer"
+              onClick={() => {
+                setCurrentVideo(video);
+                setVideos(prev => prev.map(v => v.id === video.id ? {...v, views: v.views + 1} : v));
+              }}
+            >
+              <div className="flex gap-3">
+                <div className="relative w-40 aspect-video overflow-hidden">
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <Icon name="Play" size={24} className="text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 p-3">
+                  <h4 className="text-sm font-semibold text-white mb-1 line-clamp-2">{video.title}</h4>
+                  <div className="flex items-center text-gray-400 text-xs">
+                    <Icon name="Eye" size={12} className="mr-1" />
+                    {video.views}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderAbout = () => (
     <div className="flex-1 px-8 py-12 overflow-auto">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-5xl font-bold text-white mb-12">Немного о канале</h2>
         <div className="space-y-8 text-gray-300 text-lg leading-relaxed">
           <div>
-            <h3 className="text-2xl font-semibold text-white mb-4">История</h3>
+            <p className="text-xl text-white font-medium mb-6">
+              Добро пожаловать на канал VIGRY MUSIC — пространство, где живёт музыка, творчество и вдохновение!
+            </p>
+          </div>
+          <div>
+            <h3 className="text-2xl font-semibold text-white mb-4">История создания</h3>
+            <p className="mb-4">
+              Наш путь начался <strong className="text-primary">18 июля 2025 года</strong> с запуска радио VIGRY RADIO. 
+              Именно оно стало отправной точкой для будущего музыкального канала. Первоначально канал носил то же название — 
+              VIGRY RADIO — и служил визуальным дополнением к радиоэфирам.
+            </p>
+            <p className="mb-4">
+              Со временем радиопроект приостановил работу, и канал пережил трансформацию: он был переименован в <strong className="text-primary">VIGRY MUSIC</strong>. 
+              Это стало новым этапом — мы сосредоточились на создании оригинального видеоконтента, раскрывая музыкальные таланты и экспериментируя с форматами.
+            </p>
             <p>
-              VIGRY MUSIC был создан в 2020 году с целью объединить людей через музыку. 
-              Мы начинали с небольших каверов, а сегодня создаём собственные композиции и 
-              работаем с артистами со всего мира.
+              Под занавес 2025 года произошло неожиданное: радио возродилось, но уже под новым именем — RUSSIAN HITS. 
+              Несмотря на это, VIGRY MUSIC продолжил развиваться как самостоятельный проект, сохранив свою уникальность и аудиторию.
             </p>
           </div>
           <div>
-            <h3 className="text-2xl font-semibold text-white mb-4">Наша миссия</h3>
+            <h3 className="text-2xl font-semibold text-white mb-4">Чем мы живём сегодня</h3>
+            <p className="mb-4">Сейчас VIGRY MUSIC — это:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Создавать качественный и атмосферный контент</li>
-              <li>Поддерживать начинающих музыкантов</li>
-              <li>Делиться эксклюзивными записями с нашей аудиторией</li>
-              <li>Строить сообщество настоящих ценителей музыки</li>
+              <li><strong>Регулярный контент:</strong> мы выпускаем 4–5 роликов в неделю, чтобы вы всегда находили что-то новое и интересное</li>
+              <li><strong>Разнообразие форматов:</strong> от музыкальных клипов и лайв-выступлений до тематических подборок и закулисных историй</li>
+              <li><strong>Связь с аудиторией:</strong> мы ценим каждого зрителя и стремимся создавать контент, который отзывается в сердцах</li>
+              <li><strong>Эксперименты и рост:</strong> пробуем новые жанры и ищем свежие способы подачи музыки</li>
             </ul>
-          </div>
-          <div>
-            <h3 className="text-2xl font-semibold text-white mb-4">Контакты</h3>
-            <p className="space-y-2">
-              Email: contact@vigrymusic.com<br />
-              Сотрудничество: collab@vigrymusic.com<br />
-              Связаться с нами можно через социальные сети
-            </p>
           </div>
         </div>
       </div>
     </div>
   );
+
+  const handleUploadVideo = () => {
+    if (!newVideoTitle) {
+      toast.error('Введите название видео');
+      return;
+    }
+    
+    const newVideo: Video = {
+      id: videos.length + 1,
+      title: newVideoTitle,
+      views: 0,
+      thumbnail: newVideoThumbnail ? URL.createObjectURL(newVideoThumbnail) : 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400',
+      videoUrl: newVideoFile ? URL.createObjectURL(newVideoFile) : undefined
+    };
+    
+    setVideos([...videos, newVideo]);
+    setNewVideoTitle('');
+    setNewVideoFile(null);
+    setNewVideoThumbnail(null);
+    toast.success('Видео успешно загружено!');
+    setCurrentPage('exclusive');
+  };
 
   const renderUpload = () => (
     <div className="flex-1 flex items-center justify-center px-8 py-12">
@@ -234,6 +351,8 @@ const Index = () => {
             <label className="text-white font-medium mb-2 block">Название видео</label>
             <Input 
               placeholder="Введите название"
+              value={newVideoTitle}
+              onChange={(e) => setNewVideoTitle(e.target.value)}
               className="glass border-primary/50 text-white placeholder:text-gray-500"
             />
           </div>
@@ -242,6 +361,7 @@ const Index = () => {
             <Input 
               type="file"
               accept="image/*"
+              onChange={(e) => setNewVideoThumbnail(e.target.files?.[0] || null)}
               className="glass border-primary/50 text-white"
             />
             <p className="text-sm text-gray-400 mt-1">Рекомендуемый размер: 1280x720px</p>
@@ -251,6 +371,7 @@ const Index = () => {
             <Input 
               type="file"
               accept="video/*"
+              onChange={(e) => setNewVideoFile(e.target.files?.[0] || null)}
               className="glass border-primary/50 text-white"
             />
             <p className="text-sm text-gray-400 mt-1">Загрузите видео в формате MP4</p>
@@ -259,10 +380,7 @@ const Index = () => {
             <Button 
               size="lg"
               className="flex-1 bg-primary hover:bg-primary/90 text-white font-semibold"
-              onClick={() => {
-                toast.success('Видео успешно загружено!');
-                setCurrentPage('exclusive');
-              }}
+              onClick={handleUploadVideo}
             >
               Опубликовать
             </Button>
@@ -322,6 +440,7 @@ const Index = () => {
       {currentPage === 'exclusive' && renderExclusive()}
       {currentPage === 'about' && renderAbout()}
       {currentPage === 'upload' && renderUpload()}
+      {currentPage === 'player' && renderPlayer()}
 
       <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
         <DialogContent className="glass border-primary/50 text-white">
